@@ -5,13 +5,13 @@ public class Minesweeper {
   int mineCount;
   int boardHeight;
   int boardWidth;
-  int revealedCount;
+  int score;
   public Minesweeper(int boardHeight, int boardWidth, int mineCount) {
     board = char[boardHeight * boardWidth];
     this.boardHeight = boardHeight;
     this.boardWidth = boardWidth;
     this.mineCount = mineCount;
-    revealedCount = 0;
+    score = 0;
   }
 
   public void setSquare(int i, int j, char x) {
@@ -37,18 +37,43 @@ public class Minesweeper {
   }
 
   public void clickSquare(int i, int j) {
+    if (getSquare(i, j) == 'X') {
+      score = Integer.MIN_VALUE;
+    } else if (getSquare(i, j) != '') {
+      break;
+    } else {
+      score++;
+      int mines = 0;
+      int verticalLowerBound = Math.max(i - 1, 0);
+      int verticalUpperBound = Math.min(i + 2, boardHeight);
+      int horizontalLowerBound = Math.max(j - 1, 0);
+      int horizontalUpperBound = Math.min(j + 2, boardWidth);
+      for (int a = verticalLowerBound; a < verticalUpperBound; a++) {
+        for (int b = horizontalLowerBound; b < horizontalUpperBound; b++) {
+          if (getSquare(a, b) == 'X') {
+            mines++;
+          }
+        }
+      }
+      setSquare(i, j, mines.toChar());
+      if (mines == 0) {
+        for (int a = verticalLowerBound; a < verticalUpperBound; a++) {
+          for (int b = horizontalLowerBound; b < horizontalUpperBound; b++) {
+            clickSquare(a, b);
+          }
+        }
+      }
+    }
   }
 
-  public int gameStatus() {
-    int totalSquares = boardHeight * boardWidth;
-    if (revealedCount + mineCount == totalSquares) {
-    //you win.
-    }
-    if (revealedCount < 0) {
-    //you lose.
-    } else {
-    //game continues.
-    }
+  public boolean gameLost() { 
+    return score < 0;
+  }
+  public boolean gameWon() {
+    return score + mineCount == boardWidth * boardHeight;
+  }
+  public boolean gameOver() {
+    return gameLost() || gameWon();
   }
 }
 
